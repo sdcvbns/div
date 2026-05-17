@@ -2,230 +2,251 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>مستخرج البث الذكي</title>
+  <title>متصفح مستخرج البث الذكي</title>
   <style>
-    /* --- تنسيق الواجهة (CSS) --- */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      width: 360px;
-      padding: 12px;
-      background-color: #f0f2f5;
+      width: 700px; /* قمنا بتوسيع الحجم ليتسع للمتصفح والروابط معا */
+      height: 550px;
+      padding: 10px;
+      background-color: #1e1e2e;
+      color: #cdd6f4;
       margin: 0;
+      overflow: hidden;
     }
 
     .container {
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* شريط عنوان المتصفح الداخلي */
+    .browser-bar {
+      display: flex;
+      gap: 5px;
+      background: #313244;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .browser-bar input {
+      flex: 1;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #45475a;
+      color: #fff;
+      direction: ltr;
+    }
+
+    .browser-bar button {
+      background: #89b4fa;
+      color: #11111b;
+      border: none;
+      padding: 6px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* إطار المتصفح الداخلي */
+    .browser-frame-container {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 250px;
+      position: relative;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* قسم الروابط المكتشفة */
+    .results-section {
+      height: 180px;
+      margin-top: 10px;
+      background: #313244;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
     }
 
     h2 {
-      font-size: 16px;
-      color: #1a1a1a;
-      margin-top: 0;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 8px;
+      font-size: 14px;
+      margin: 0 0 8px 0;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-    }
-
-    .counter {
-      background: #007bff;
-      color: white;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-
-    .btn-clear {
-      width: 100%;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 12px;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-
-    .btn-clear:hover {
-      background-color: #bd2130;
+      color: #a6e3a1;
     }
 
     .links-list {
-      max-height: 280px;
+      flex: 1;
       overflow-y: auto;
-      padding-right: 2px;
-    }
-
-    /* تخصيص شريط التمرير */
-    .links-list::-webkit-scrollbar {
-      width: 4px;
-    }
-    .links-list::-webkit-scrollbar-thumb {
-      background: #ccc;
-      border-radius: 4px;
     }
 
     .link-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f8f9fa;
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 6px;
-      border-right: 4px solid #28a745;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .link-details {
-      display: flex;
-      flex-direction: column;
-      width: 240px;
+      background: #45475a;
+      padding: 6px 10px;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      font-size: 11px;
     }
 
     .link-text {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      width: 520px;
       direction: ltr;
       text-align: left;
-      font-size: 11px;
-      color: #333;
-    }
-
-    .link-type {
-      font-size: 9px;
-      color: #28a745;
-      font-weight: bold;
-      margin-top: 2px;
-      text-transform: uppercase;
     }
 
     .btn-copy {
-      background: #007bff;
-      color: white;
+      background: #a6e3a1;
+      color: #11111b;
       border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
+      padding: 4px 8px;
+      border-radius: 3px;
       cursor: pointer;
       font-size: 11px;
-      transition: all 0.2s;
-    }
-
-    .btn-copy:hover {
-      background: #0056b3;
     }
 
     .no-links {
       text-align: center;
       color: #6c757d;
-      font-size: 13px;
-      padding: 20px 0;
+      font-size: 12px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2>
-      <span>🎯 الروابط المكتشفة</span>
-      <span id="linksCount" class="counter">0</span>
-    </h2>
-    
-    <button id="clearBtn" class="btn-clear">مسح القائمة الحاليّة</button>
-    
-    <div id="linksContainer" class="links-list">
-      <p class="no-links">لم يتم التقاط أي بث بعد.. شغّل فيديو في أي موقع.</p>
+    <!-- شريط تصفح المواقع -->
+    <div class="browser-bar">
+      <input type="text" id="urlInput" value="https://www.w3schools.com/html/html5_video.asp" placeholder="أدخل رابط موقع الأفلام أو البث هنا...">
+      <button id="goBtn">انتقال</button>
+    </div>
+
+    <!-- المتصفح الداخلي -->
+    <div class="browser-frame-container">
+      <iframe id="browserFrame" src="https://www.w3schools.com/html/html5_video.asp" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
+    </div>
+
+    <!-- قسم عرض الروابط المستخرجة -->
+    <div class="results-section">
+      <h2>
+        <span>🎯 الروابط الملتقطة داخل المتصفح:</span>
+        <button id="clearBtn" style="background:transparent; border:none; color:#f38ba8; cursor:pointer; font-size:11px;">مسح القائمة</button>
+      </h2>
+      <div id="linksContainer" class="links-list">
+        <p class="no-links">تصفح المواقع وشغّل أي فيديو ليتم اصطياد الرابط هنا...</p>
+      </div>
     </div>
   </div>
 
-  <!-- --- كود التشغيل والربط (JavaScript) --- -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      const iframe = document.getElementById("browserFrame");
+      const urlInput = document.getElementById("urlInput");
+      const goBtn = document.getElementById("goBtn");
       const container = document.getElementById("linksContainer");
       const clearBtn = document.getElementById("clearBtn");
-      const countSpan = document.getElementById("linksCount");
+      
+      let capturedUrls = new Set();
 
-      // دالة لجلب وعرض الروابط من ذاكرة الإضافة المشتركة
-      function displayLinks() {
-        if (typeof chrome !== "undefined" && chrome.storage) {
-          chrome.storage.local.get({ capturedLinks: [] }, function(result) {
-            const links = result.capturedLinks;
-            container.innerHTML = "";
-            countSpan.textContent = links.length;
-
-            if (links.length === 0) {
-              container.innerHTML = '<p class="no-links">لم يتم التقاط أي بث بعد.. شغّل فيديو في أي موقع.</p>';
-              return;
-            }
-
-            links.forEach((link) => {
-              const item = document.createElement("div");
-              item.className = "link-item";
-
-              // استخراج صيغة الملف للعرض (m3u8, mp4...)
-              let extension = "STREAM";
-              if (link.includes(".m3u8")) extension = "m3u8 (بث مباشر)";
-              else if (link.includes(".mp4")) extension = "mp4 (فيديو)";
-              else if (link.includes(".mkv")) extension = "mkv (فيديو)";
-              else if (link.includes(".mpd")) extension = "mpd (بث مشفر)";
-
-              const detailsDiv = document.createElement("div");
-              detailsDiv.className = "link-details";
-
-              const textSpan = document.createElement("span");
-              textSpan.className = "link-text";
-              textSpan.textContent = link;
-              textSpan.title = link;
-
-              const typeSpan = document.createElement("span");
-              typeSpan.className = "link-type";
-              typeSpan.textContent = extension;
-
-              detailsDiv.appendChild(textSpan);
-              detailsDiv.appendChild(typeSpan);
-
-              const copyBtn = document.createElement("button");
-              copyBtn.className = "btn-copy";
-              copyBtn.textContent = "نسخ";
-              
-              // حدث نسخ الرابط للحافظة
-              copyBtn.addEventListener("click", () => {
-                navigator.clipboard.writeText(link).then(() => {
-                  copyBtn.textContent = "تم!";
-                  copyBtn.style.background = "#28a745";
-                  setTimeout(() => {
-                    copyBtn.textContent = "نسخ";
-                    copyBtn.style.background = "#007bff";
-                  }, 1200);
-                });
-              });
-
-              item.appendChild(detailsDiv);
-              item.appendChild(copyBtn);
-              container.appendChild(item);
-            });
-          });
+      // زر الانتقال للموقع المكتوب
+      goBtn.addEventListener("click", function() {
+        let url = urlInput.value.trim();
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+          url = "https://" + url;
         }
+        urlInput.value = url;
+        iframe.src = url;
+      });
+
+      // دالة لإضافة الرابط المكتشف للواجهة
+      function addLink(url) {
+        if (capturedUrls.has(url)) return; // منع التكرار
+        capturedUrls.add(url);
+
+        if (capturedUrls.size === 1) container.innerHTML = "";
+
+        const item = document.createElement("div");
+        item.className = "link-item";
+
+        const textSpan = document.createElement("span");
+        textSpan.className = "link-text";
+        textSpan.textContent = url;
+        textSpan.title = url;
+
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "btn-copy";
+        copyBtn.textContent = "نسخ";
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(url);
+          copyBtn.textContent = "تم!";
+          setTimeout(() => { copyBtn.textContent = "نسخ"; }, 1000);
+        });
+
+        item.appendChild(textSpan);
+        item.appendChild(copyBtn);
+        container.appendChild(item);
       }
 
-      // مسح الروابط المخزنة
-      clearBtn.addEventListener("click", function() {
-        if (typeof chrome !== "undefined" && chrome.storage) {
-          chrome.storage.local.set({ capturedLinks: [] }, function() {
-            displayLinks();
-          });
+      // آلية الاصطياد: فحص حركة طلبات المتصفح الداخلي (إذا تم تشغيله كإضافة)
+      if (typeof chrome !== "undefined" && chrome.webRequest) {
+        chrome.webRequest.onBeforeRequest.addListener(
+          function(details) {
+            const url = details.url;
+            if (url.includes(".m3u8") || url.includes(".mp4") || url.includes(".mkv")) {
+              addLink(url);
+            }
+          },
+          { urls: ["<all_urls>"] }
+        );
+      }
+
+      // آلية اصطياد احتياطية: فحص عناصر الفيديو داخل الـ iframe مباشرة في حال سمح الموقع بذلك
+      iframe.addEventListener("load", function() {
+        try {
+          const iframeWindow = iframe.contentWindow;
+          
+          // 1. مراقبة مشغلات الفيديو الافتراضية HTML5
+          const videos = iframe.contentDocument.getElementsByTagName("video");
+          for (let img of videos) {
+            if (img.src) addLink(img.src);
+          }
+
+          // 2. اعتراض طلبات الـ Fetch والـ XHR داخل الـ iframe لاصطياد الروابط المخفية
+          const originalFetch = iframeWindow.fetch;
+          iframeWindow.fetch = async function(...args) {
+            const url = args[0];
+            if (typeof url === 'string' && (url.includes(".m3u8") || url.includes(".mp4"))) {
+              addLink(url);
+            }
+            return originalFetch.apply(this, args);
+          };
+        } catch (e) {
+          console.log("القيود الأمنية للموقع تمنع الفحص المباشر، يعتمد البرنامج الآن على شبكة المتصفح الأساسية (WebRequest).");
         }
       });
 
-      // تحديث القائمة تلقائياً عند فتح واجهة الإضافة
-      displayLinks();
+      // مسح القائمة
+      clearBtn.addEventListener("click", function() {
+        capturedUrls.clear();
+        container.innerHTML = '<p class="no-links">تصفح المواقع وشغّل أي فيديو ليتم اصطياد الرابط هنا...</p>';
+      });
     });
   </script>
 </body>
