@@ -2,290 +2,138 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متصفح مستخرج البث الموحد</title>
+  <title>لوحة اصطياد البث</title>
   <style>
-    /* --- تنسيق المظهر والواجهة (CSS) --- */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 15px;
-      background-color: #11111b;
-      color: #cdd6f4;
-      display: flex;
-      flex-direction: column;
-      height: 95vh;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      height: 100%;
-    }
-
-    /* شريط التحكم الخارجي */
-    .browser-bar {
-      display: flex;
-      gap: 8px;
-      background: #1e1e2e;
+      width: 380px;
       padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      background-color: #1e1e2e;
+      color: #cdd6f4;
+      margin: 0;
     }
-
-    .browser-bar input {
-      flex: 1;
-      padding: 10px 15px;
-      border: 1px solid #45475a;
-      border-radius: 6px;
+    .container {
       background: #313244;
-      color: #fff;
-      font-size: 14px;
-      direction: ltr;
-    }
-
-    .browser-bar button {
-      background: #89b4fa;
-      color: #11111b;
-      border: none;
-      padding: 10px 25px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      transition: background 0.2s;
-    }
-
-    .browser-bar button:hover {
-      background: #b4befe;
-    }
-
-    /* منطقة عرض موقع البث (المتصفح الداخلي) */
-    .viewport-container {
-      flex: 2;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      position: relative;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #ffffff;
-    }
-
-    /* قسم عرض الروابط المستخرجة */
-    .capture-section {
-      flex: 1;
-      background: #1e1e2e;
-      border-radius: 10px;
       padding: 15px;
-      display: flex;
-      flex-direction: column;
-      min-height: 180px;
+      border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-
-    .capture-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #45475a;
-      padding-bottom: 8px;
-    }
-
-    .capture-title {
+    h2 {
       font-size: 15px;
       color: #a6e3a1;
-      font-weight: bold;
-      margin: 0;
+      margin-top: 0;
+      border-bottom: 2px solid #89b4fa;
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
     }
-
     .btn-clear {
-      background: transparent;
-      border: 1px solid #f38ba8;
-      color: #f38ba8;
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-
-    .btn-clear:hover {
-      background: #f38ba8;
+      width: 100%;
+      background-color: #f38ba8;
       color: #11111b;
+      border: none;
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
-
     .links-list {
-      flex: 1;
+      max-height: 250px;
       overflow-y: auto;
-      padding-right: 5px;
     }
-
     .link-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #313244;
-      padding: 8px 12px;
+      background: #45475a;
+      padding: 8px;
       margin-bottom: 6px;
-      border-radius: 6px;
+      border-radius: 5px;
       border-right: 4px solid #a6e3a1;
     }
-
-    .link-url {
+    .link-text {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      width: 85%;
+      width: 260px;
       direction: ltr;
       text-align: left;
       font-size: 12px;
-      color: #cdd6f4;
     }
-
     .btn-copy {
-      background: #a6e3a1;
+      background: #89b4fa;
       color: #11111b;
       border: none;
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
     }
-
-    .btn-copy:hover {
-      background: #94e2d5;
-    }
-
     .no-links {
       text-align: center;
       color: #6c757d;
       font-size: 13px;
-      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="browser-bar">
-      <input type="text" id="urlInput" value="https://www.w3schools.com/html/html5_video.asp" placeholder="ضع رابط موقع المسلسلات أو القنوات هنا...">
-      <button id="goBtn">تصفح واصطياد</button>
-    </div>
-
-    <div class="viewport-container">
-      <iframe id="browserFrame" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
-    </div>
-
-    <div class="capture-section">
-      <div class="capture-header">
-        <h2 class="capture-title">🎯 الروابط المستخرجة تلقائياً:</h2>
-        <button id="clearBtn" class="btn-clear">مسح القائمة</button>
-      </div>
-      <div id="linksContainer" class="links-list">
-        <p class="no-links">أدخل رابط الموقع واضغط (تصفح واصطياد) وشغل الفيديو لبدء الاستخراج...</p>
-      </div>
+    <h2>🎯 الروابط المكتشفة بالخلفية</h2>
+    <button id="clearBtn" class="btn-clear">مسح الروابط الحالية</button>
+    <div id="linksContainer" class="links-list">
+      <p class="no-links">بانتظار تشغيل أي بث أو فيديو في المتصفح...</p>
     </div>
   </div>
 
-  /* --- كود التشغيل والذكاء الاصطناعي (JavaScript) --- */
-  <script>
+  <script strain="local">
     document.addEventListener("DOMContentLoaded", function() {
-      const iframe = document.getElementById("browserFrame");
-      const urlInput = document.getElementById("urlInput");
-      const goBtn = document.getElementById("goBtn");
       const container = document.getElementById("linksContainer");
       const clearBtn = document.getElementById("clearBtn");
-      
-      let capturedUrls = new Set();
-      const streamExtensions = [".m3u8", ".mp4", ".mkv", ".mpd", "master.json"];
 
-      // دالة إضافة الروابط المكتشفة لشاشة العرض
-      function addLink(url) {
-        if (!url || capturedUrls.has(url)) return;
-        capturedUrls.add(url);
+      function updateUI() {
+        chrome.storage.local.get({ capturedLinks: [] }, function(result) {
+          const links = result.capturedLinks;
+          container.innerHTML = "";
 
-        if (capturedUrls.size === 1) container.innerHTML = "";
+          if (links.length === 0) {
+            container.innerHTML = '<p class="no-links">بانتظار تشغيل أي بث أو فيديو في المتصفح...</p>';
+            return;
+          }
 
-        const item = document.createElement("div");
-        item.className = "link-item";
+          links.forEach((link) => {
+            const item = document.createElement("div");
+            item.className = "link-item";
 
-        const urlSpan = document.createElement("span");
-        urlSpan.className = "link-url";
-        urlSpan.textContent = url;
-        urlSpan.title = url;
+            const textSpan = document.createElement("span");
+            textSpan.className = "link-text";
+            textSpan.textContent = link;
+            textSpan.title = link;
 
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "btn-copy";
-        copyBtn.textContent = "نسخ";
-        copyBtn.addEventListener("click", () => {
-          navigator.clipboard.writeText(url);
-          copyBtn.textContent = "تم!";
-          setTimeout(() => { copyBtn.textContent = "نسخ"; }, 1200);
+            const copyBtn = document.createElement("button");
+            copyBtn.className = "btn-copy";
+            copyBtn.textContent = "نسخ";
+            copyBtn.addEventListener("click", () => {
+              navigator.clipboard.writeText(link);
+              copyBtn.textContent = "تم!";
+              setTimeout(() => { copyBtn.textContent = "نسخ"; }, 1000);
+            });
+
+            item.appendChild(textSpan);
+            item.appendChild(copyBtn);
+            container.appendChild(item);
+          });
         });
-
-        item.appendChild(urlSpan);
-        item.appendChild(copyBtn);
-        container.appendChild(item);
       }
 
-      // عند الضغط على زر التصفح
-      goBtn.addEventListener("click", function() {
-        let targetUrl = urlInput.value.trim();
-        if (!targetUrl) return;
-
-        if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-          targetUrl = "https://" + targetUrl;
-        }
-        urlInput.value = targetUrl;
-
-        // استخدام بروكسي لكسر حماية المواقع وحجب الـ CORS والأمان المتزمت
-        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(targetUrl);
-        iframe.src = proxyUrl;
-      });
-
-      // آلية فحص وقراءة الأكواد ومصادر الفيديو داخل الصفحة المجلوبة
-      iframe.addEventListener("load", function() {
-        try {
-          const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-          const htmlContent = iframeDocument.documentElement.innerHTML;
-
-          // 1. البحث باستخدام التعبيرات المنتظمة (Regex) عن أي روابط بث مخفية في السورس كود
-          streamExtensions.forEach(ext => {
-            const regex = new RegExp(`https?://[^"'>\\s]+?\\${ext}[^"'>\\s]*`, "gi");
-            let matches = htmlContent.match(regex);
-            if (matches) {
-              matches.forEach(url => addLink(url));
-            }
-          });
-
-          // 2. فحص تاغات الـ <video> والـ <source> المباشرة
-          const videos = iframeDocument.getElementsByTagName("video");
-          for (let v of videos) {
-            if (v.src) addLink(v.src);
-            const sources = v.getElementsByTagName("source");
-            for (let s of sources) {
-              if (s.src) addLink(s.src);
-            }
-          }
-        } catch (error) {
-          console.log("تعذر فحص الكود المباشر بسبب حماية الموقع، يرجى تشغيل الفيديو ليلقطه المتصفح.");
-        }
-      });
-
-      // مسح القائمة
       clearBtn.addEventListener("click", function() {
-        capturedUrls.clear();
-        container.innerHTML = '<p class="no-links">أدخل رابط الموقع واضغط (تصفح واصطياد) وشغل الفيديو لبدء الاستخراج...</p>';
+        chrome.storage.local.set({ capturedLinks: [] }, updateUI);
       });
+
+      // جلب الروابط وتحديث القائمة عند فتح الواجهة
+      updateUI();
     });
   </script>
 </body>
