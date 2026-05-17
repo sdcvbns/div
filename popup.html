@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>مستخرج البث الذكي</title>
+  <style>
+    /* --- تنسيق الواجهة (CSS) --- */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 360px;
+      padding: 12px;
+      background-color: #f0f2f5;
+      margin: 0;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-top: 0;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .counter {
+      background: #007bff;
+      color: white;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .btn-clear {
+      width: 100%;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .btn-clear:hover {
+      background-color: #bd2130;
+    }
+
+    .links-list {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    /* تخصيص شريط التمرير */
+    .links-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .links-list::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border-right: 4px solid #28a745;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .link-details {
+      display: flex;
+      flex-direction: column;
+      width: 240px;
+    }
+
+    .link-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      direction: ltr;
+      text-align: left;
+      font-size: 11px;
+      color: #333;
+    }
+
+    .link-type {
+      font-size: 9px;
+      color: #28a745;
+      font-weight: bold;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .btn-copy {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: #0056b3;
+    }
+
+    .no-links {
+      text-align: center;
+      color: #6c757d;
+      font-size: 13px;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>
+      <span>🎯 الروابط المكتشفة</span>
+      <span id="linksCount" class="counter">0</span>
+    </h2>
+    
+    <button id="clearBtn" class="btn-clear">مسح القائمة الحاليّة</button>
+    
+    <div id="linksContainer" class="links-list">
+      <p class="no-links">لم يتم التقاط أي بث بعد.. شغّل فيديو في أي موقع.</p>
+    </div>
+  </div>
+
+  <!-- --- كود التشغيل والربط (JavaScript) --- -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const container = document.getElementById("linksContainer");
+      const clearBtn = document.getElementById("clearBtn");
+      const countSpan = document.getElementById("linksCount");
+
+      // دالة لجلب وعرض الروابط من ذاكرة الإضافة المشتركة
+      function displayLinks() {
+        if (typeof chrome !== "undefined" && chrome.storage) {
+          chrome.storage.local.get({ capturedLinks: [] }, function(result) {
+            const links = result.capturedLinks;
+            container.innerHTML = "";
+            countSpan.textContent = links.length;
+
+            if (links.length === 0) {
+              container.innerHTML = '<p class="no-links">لم يتم التقاط أي بث بعد.. شغّل فيديو في أي موقع.</p>';
+              return;
+            }
+
+            links.forEach((link) => {
+              const item = document.createElement("div");
+              item.className = "link-item";
+
+              // استخراج صيغة الملف للعرض (m3u8, mp4...)
+              let extension = "STREAM";
+              if (link.includes(".m3u8")) extension = "m3u8 (بث مباشر)";
+              else if (link.includes(".mp4")) extension = "mp4 (فيديو)";
+              else if (link.includes(".mkv")) extension = "mkv (فيديو)";
+              else if (link.includes(".mpd")) extension = "mpd (بث مشفر)";
+
+              const detailsDiv = document.createElement("div");
+              detailsDiv.className = "link-details";
+
+              const textSpan = document.createElement("span");
+              textSpan.className = "link-text";
+              textSpan.textContent = link;
+              textSpan.title = link;
+
+              const typeSpan = document.createElement("span");
+              typeSpan.className = "link-type";
+              typeSpan.textContent = extension;
+
+              detailsDiv.appendChild(textSpan);
+              detailsDiv.appendChild(typeSpan);
+
+              const copyBtn = document.createElement("button");
+              copyBtn.className = "btn-copy";
+              copyBtn.textContent = "نسخ";
+              
+              // حدث نسخ الرابط للحافظة
+              copyBtn.addEventListener("click", () => {
+                navigator.clipboard.writeText(link).then(() => {
+                  copyBtn.textContent = "تم!";
+                  copyBtn.style.background = "#28a745";
+                  setTimeout(() => {
+                    copyBtn.textContent = "نسخ";
+                    copyBtn.style.background = "#007bff";
+                  }, 1200);
+                });
+              });
+
+              item.appendChild(detailsDiv);
+              item.appendChild(copyBtn);
+              container.appendChild(item);
+            });
+          });
+        }
+      }
+
+      // مسح الروابط المخزنة
+      clearBtn.addEventListener("click", function() {
+        if (typeof chrome !== "undefined" && chrome.storage) {
+          chrome.storage.local.set({ capturedLinks: [] }, function() {
+            displayLinks();
+          });
+        }
+      });
+
+      // تحديث القائمة تلقائياً عند فتح واجهة الإضافة
+      displayLinks();
+    });
+  </script>
+</body>
+</html>
