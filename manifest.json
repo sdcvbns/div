@@ -1,9 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Stream Extractor OneCode",
-  "version": "1.2",
-  "permissions": ["webRequest", "storage"],
-  "host_permissions": ["<all_urls>"],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_popup": "popup.html" }
+  "name": "متصفح اصطياد البث",
+  "version": "2.0",
+  "permissions": [
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_index": "index.html"
+  }
 }
